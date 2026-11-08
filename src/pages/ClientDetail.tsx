@@ -507,7 +507,8 @@ function BrandKit({ client }: { client: Client }) {
 
 /* ---------------- Campaigns ---------------- */
 function ClientCampaigns({ client }: { client: Client }) {
-  const campaigns = useData((s) => s.campaigns.filter((c) => c.clientId === client.id)).sort((a, b) => b.sendAt.localeCompare(a.sendAt));
+  const all = useData((s) => s.campaigns);
+  const campaigns = all.filter((c) => c.clientId === client.id).sort((a, b) => b.sendAt.localeCompare(a.sendAt));
   const { openCampaign, openNewCampaign } = useUI();
   if (!campaigns.length)
     return (

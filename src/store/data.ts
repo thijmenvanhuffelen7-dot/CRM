@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { buildSeed, uid, type SeedData } from "@/data/seed";
 import type {
   Activity,
@@ -18,6 +18,27 @@ import type {
 } from "@/data/types";
 import { useAuth } from "./auth";
 import { campaignStatusLabel } from "@/lib/constants";
+import { hasSupabase } from "@/lib/supabase";
+
+/** Empty workspace, used when data comes from Supabase instead of the demo seed. */
+export function emptyWorkspace(): SeedData {
+  return {
+    team: [],
+    packages: [],
+    stages: [],
+    clients: [],
+    leads: [],
+    campaigns: [],
+    tasks: [],
+    metrics: [],
+    activities: [],
+    agency: { name: "", website: "", email: "", currency: "EUR", address: "" },
+    integrations: [],
+  };
+}
+
+// With Supabase connected the database is the source of truth, so nothing is cached in localStorage.
+const noopStorage: StateStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
 
 type Patch<T> = Partial<T>;
 
@@ -73,7 +94,7 @@ export const useData = create<DataState>()(
         set((s) => ({ activities: [{ id: uid("a"), createdAt: now(), actorId: actor(), ...a }, ...s.activities].slice(0, 300) }));
 
       return {
-        ...buildSeed(),
+        ...(hasSupabase ? emptyWorkspace() : buildSeed()),
         seededAt: now(),
 
         // ---------- Leads
@@ -317,12 +338,13 @@ export const useData = create<DataState>()(
     },
     {
       name: "crm-data",
+      storage: createJSONStorage(() => (hasSupabase ? noopStorage : localStorage)),
       version: STORAGE_VERSION,
       migrate: () => ({ ...buildSeed(), seededAt: new Date().toISOString() }) as unknown as DataState,
       onRehydrateStorage: () => (state) => {
         // Demo data is relative to "today": refresh it if it was seeded on an earlier day
         // and the user never touched it, so the dashboard never looks stale.
-        if (state && new Date(state.seededAt).toDateString() !== new Date().toDateString() && !localStorage.getItem("crm-touched")) {
+        if (state && !hasSupabase && new Date(state.seededAt).toDateString() !== new Date().toDateString() && !localStorage.getItem("crm-touched")) {
           state.resetDemo();
         }
       },

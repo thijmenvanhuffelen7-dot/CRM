@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Role } from "@/data/types";
+import { supabase } from "@/lib/supabase";
 
 interface AuthState {
   userId: string | null;
@@ -13,7 +14,10 @@ export const useAuth = create<AuthState>()(
     (set) => ({
       userId: null,
       signIn: (userId) => set({ userId }),
-      signOut: () => set({ userId: null }),
+      signOut: () => {
+        set({ userId: null });
+        void supabase?.auth.signOut();
+      },
     }),
     { name: "crm-auth" },
   ),

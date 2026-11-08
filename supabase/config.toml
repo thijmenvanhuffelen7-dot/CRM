@@ -1,0 +1,2 @@
+# Supabase project config (used by the Supabase CLI and the GitHub integration).
+project_id = "inbox-crm"

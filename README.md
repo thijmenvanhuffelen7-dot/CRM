@@ -41,7 +41,18 @@ On first load the app seeds realistic demo data relative to today: 8 clients, 15
 
 ### Supabase
 
-`supabase/schema.sql` has the full Postgres schema with row-level security that matches the role matrix. Copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to turn on Supabase email/password sign-in. The data layer (`src/store/data.ts`) is one store whose actions map one-to-one onto those tables, so it can be swapped for Supabase queries.
+Without Supabase settings the app runs in demo mode and stores data in the browser. With them, Supabase is the shared database for the whole team.
+
+1. **Database:** `supabase/migrations/` holds the schema. Through the Supabase GitHub integration it runs automatically when this branch is merged into the production branch. You can also paste the file into the SQL editor.
+2. **Frontend:** set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Supabase → Project Settings → API) in `.env` locally, or in your hosting provider's environment variables.
+3. **Auth:** under Authentication → URL Configuration, set the Site URL to the app's address so confirmation emails link back correctly.
+
+How it works:
+- **Access:** the first person to create an account becomes the admin. Everyone else needs an invite: the admin adds their email on the Team page, and then they create an account with that email. Anyone else who signs up sees a "no access" screen and can't read any data.
+- **Permissions:** row-level security enforces roles in the database. Leads are admin/account manager only; settings and team are admin only; campaigns, tasks and clients are open to the whole team.
+- **Live updates:** every change is saved straight away, and Realtime pushes it to everyone else who has the app open.
+- **Demo data:** Settings → Workspace data → **Load demo data** fills a new workspace with the demo set.
+- **Data model:** each table stores documents as `id` + `data jsonb`, in the same shape as `src/data/types.ts`.
 
 ## Scripts
 

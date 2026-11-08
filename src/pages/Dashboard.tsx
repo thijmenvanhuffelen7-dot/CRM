@@ -35,7 +35,7 @@ export default function Dashboard() {
 
 function DashboardContent() {
   const { clients, campaigns, tasks, leads, stages, metrics, activities, team, toggleTask } = useData();
-  const { openCampaign, openQuickTask, openLead } = useUI();
+  const { openCampaign, openQuickTask, openLead, setNewClientOpen } = useUI();
   const userId = useAuth((s) => s.userId);
   const me = useCurrentUser();
   const canBilling = useCan("billing.view");
@@ -89,6 +89,18 @@ function DashboardContent() {
           </Button>
         </div>
       </div>
+
+      {clients.length === 0 && leads.length === 0 && (
+        <Card className="mb-4 flex flex-wrap items-center gap-3 border-primary/30 bg-primary/[0.04] p-4">
+          <Sparkles className="size-5 text-primary" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">Your workspace is empty</p>
+            <p className="text-sm text-muted-foreground">Add your first client or lead, or load the demo data set from Settings to explore.</p>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => navigate("/settings?section=data")}>Load demo data</Button>
+          <Button size="sm" onClick={() => setNewClientOpen(true)}><Plus /> Add client</Button>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Active clients" value={clients.length} icon={Users} hint={`${clients.filter((c) => c.health !== "good").length} need attention`} onClick={() => navigate("/clients")} />
@@ -245,6 +257,7 @@ function DashboardContent() {
             <CardTitle>Recent activity</CardTitle>
           </CardHeader>
           <CardContent>
+            {activities.length === 0 && <p className="text-sm text-muted-foreground">Changes your team makes will show up here.</p>}
             <ol className="space-y-3.5">
               {activities.slice(0, 8).map((a) => {
                 const m = team.find((x) => x.id === a.actorId);

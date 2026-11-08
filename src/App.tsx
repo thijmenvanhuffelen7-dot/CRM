@@ -7,7 +7,9 @@ import { useAuth } from "@/store/auth";
 import { useData } from "@/store/data";
 import { useUI } from "@/store/ui";
 import { PageSkeleton } from "@/components/shared/Skeletons";
-import Login from "@/pages/Login";
+import Login, { AccessProblem } from "@/pages/Login";
+import { useRemote } from "@/lib/sync";
+import { hasSupabase } from "@/lib/supabase";
 import { setCurrency } from "@/lib/utils";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -23,6 +25,12 @@ const Settings = lazy(() => import("@/pages/Settings"));
 function Protected() {
   const userId = useAuth((s) => s.userId);
   const exists = useData((s) => s.team.some((m) => m.id === userId));
+  const status = useRemote((s) => s.status);
+  if (hasSupabase) {
+    if (status === "signed_out") return <Login />;
+    if (status === "loading") return <PageSkeleton />;
+    if (status !== "ready") return <AccessProblem />;
+  }
   if (!userId || !exists) return <Login />;
   return <AppShell />;
 }

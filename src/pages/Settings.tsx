@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -19,6 +20,7 @@ import { uid } from "@/data/seed";
 import type { Integration, PipelineStage, StageKind } from "@/data/types";
 import { cn, money, setCurrency } from "@/lib/utils";
 import { hasSupabase } from "@/lib/supabase";
+import { loadDemoData } from "@/lib/sync";
 
 const sections = [
   { id: "agency", label: "Agency profile", icon: Building2 },
@@ -30,7 +32,8 @@ const sections = [
 ];
 
 export default function Settings() {
-  const [section, setSection] = useState("agency");
+  const [params] = useSearchParams();
+  const [section, setSection] = useState(params.get("section") ?? "agency");
   const canManage = useCan("settings.manage");
 
   return (
@@ -309,31 +312,51 @@ function AppearanceSection() {
 
 function DataSection({ disabled }: { disabled: boolean }) {
   const resetDemo = useData((s) => s.resetDemo);
+  const counts = { clients: useData((s) => s.clients.length), leads: useData((s) => s.leads.length), campaigns: useData((s) => s.campaigns.length) };
   return (
     <Card>
       <CardHeader><CardTitle>Workspace data</CardTitle></CardHeader>
       <CardContent className="space-y-4 text-sm">
-        <p className="text-muted-foreground">
-          {hasSupabase
-            ? "Connected to Supabase for authentication."
-            : "Running in demo mode: data is stored in this browser. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to connect a backend (schema in supabase/schema.sql)."}
-        </p>
-        <Button
-          variant="secondary"
-          disabled={disabled}
-          onClick={() => {
-            if (!window.confirm("Reset all clients, leads, campaigns and tasks to the demo data?")) return;
-            resetDemo();
-            try {
-              localStorage.removeItem("crm-touched");
-            } catch {
-              /* ignore */
-            }
-            toast.success("Demo data restored");
-          }}
-        >
-          <RotateCcw /> Reset demo data
-        </Button>
+        {hasSupabase ? (
+          <>
+            <p className="text-muted-foreground">
+              Connected to Supabase. Changes are saved to the database and show up live for everyone on the team. The workspace has {counts.clients} clients, {counts.leads} leads and {counts.campaigns} campaigns.
+            </p>
+            <Button
+              variant="secondary"
+              disabled={disabled}
+              onClick={() => {
+                if (!window.confirm("Replace all clients, leads, campaigns, tasks and reports in the database with demo data? This can't be undone.")) return;
+                loadDemoData();
+                toast.success("Demo data loaded", { description: "Saved to Supabase." });
+              }}
+            >
+              <RotateCcw /> Load demo data
+            </Button>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground">
+              Running in demo mode: data is stored in this browser only. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to connect Supabase (migrations in supabase/migrations).
+            </p>
+            <Button
+              variant="secondary"
+              disabled={disabled}
+              onClick={() => {
+                if (!window.confirm("Reset all clients, leads, campaigns and tasks to the demo data?")) return;
+                resetDemo();
+                try {
+                  localStorage.removeItem("crm-touched");
+                } catch {
+                  /* ignore */
+                }
+                toast.success("Demo data restored");
+              }}
+            >
+              <RotateCcw /> Reset demo data
+            </Button>
+          </>
+        )}
       </CardContent>
     </Card>
   );
