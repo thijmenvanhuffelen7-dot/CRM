@@ -64,7 +64,7 @@ interface DataState extends SeedData {
 const actor = () => useAuth.getState().userId ?? "u_sophie";
 const now = () => new Date().toISOString();
 
-const STORAGE_VERSION = 4;
+const STORAGE_VERSION = 5;
 
 export const useData = create<DataState>()(
   persist(
