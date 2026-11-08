@@ -115,6 +115,11 @@ export function Sidebar() {
             {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </button>
         </Tooltip>
+        <Tooltip content="Log out" side={collapsed ? "right" : "top"}>
+          <button onClick={signOut} aria-label="Log out" className="rounded-sm p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
+            <LogOut className="size-4" />
+          </button>
+        </Tooltip>
         {collapsed && (
           <Tooltip content="Expand sidebar" shortcut={["["]} side="right">
             <button onClick={toggle} aria-label="Expand sidebar" className="rounded-sm p-1.5 text-muted-foreground transition hover:bg-accent hover:text-foreground">

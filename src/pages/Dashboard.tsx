@@ -92,8 +92,8 @@ function DashboardContent() {
 
       {clients.length === 0 && leads.length === 0 && (
         <Card className="mb-4 flex flex-wrap items-center gap-3 border-primary/30 bg-primary/[0.04] p-4">
-          <Sparkles className="size-5 text-primary" />
-          <div className="min-w-0 flex-1">
+          <Sparkles className="size-5 shrink-0 text-primary" />
+          <div className="min-w-[200px] flex-1">
             <p className="text-sm font-medium">Your workspace is empty</p>
             <p className="text-sm text-muted-foreground">Add your first client or lead, or load the demo data set from Settings to explore.</p>
           </div>

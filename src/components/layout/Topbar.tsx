@@ -1,12 +1,13 @@
 import { useLocation, Link } from "react-router-dom";
-import { CalendarPlus, CheckSquare, ChevronRight, Moon, Plus, Search, Sun, Target, UserPlus } from "lucide-react";
+import { CalendarPlus, CheckSquare, ChevronRight, LogOut, Moon, Plus, Search, Sun, Target, UserPlus } from "lucide-react";
 import { useUI } from "@/store/ui";
 import { useData } from "@/store/data";
 import { modKey } from "@/lib/utils";
 import { Kbd } from "@/components/ui/kbd";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown";
+import { useAuth } from "@/store/auth";
 import { MemberAvatar } from "@/components/shared/Avatar";
 import { useCan, useCurrentUser } from "@/hooks/usePermission";
 import { nav } from "./nav";
@@ -37,6 +38,7 @@ export function Topbar() {
   const setCommandOpen = useUI((s) => s.setCommandOpen);
   const { theme, toggleTheme, openQuickTask, setNewLeadOpen, openNewCampaign, setNewClientOpen } = useUI();
   const me = useCurrentUser();
+  const signOut = useAuth((s) => s.signOut);
   const canLeads = useCan("leads.manage");
   const canClients = useCan("clients.manage");
 
@@ -95,9 +97,24 @@ export function Topbar() {
             {theme === "dark" ? <Sun /> : <Moon />}
           </Button>
         </Tooltip>
-        <Link to="/team" className="ml-1 md:hidden" aria-label="Your profile">
-          <MemberAvatar member={me} size="md" tooltip={false} />
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="ml-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 md:hidden" aria-label="Account menu">
+            <MemberAvatar member={me} size="md" tooltip={false} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="text-foreground">
+              <span className="block truncate text-sm font-medium">{me?.name}</span>
+              <span className="block truncate text-xs font-normal text-muted-foreground">{me?.email}</span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={toggleTheme}>
+              {theme === "dark" ? <Sun /> : <Moon />} {theme === "dark" ? "Light mode" : "Dark mode"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={signOut}>
+              <LogOut /> Log out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
