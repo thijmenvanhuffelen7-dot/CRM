@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 9%;
+    --subtle: 240 5% 98.5%;
+    --sidebar: 240 5% 97.6%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 9%;
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 95.5%;
+    --secondary-foreground: 240 6% 15%;
+    --muted: 240 5% 95.5%;
+    --muted-foreground: 240 4% 44%;
+    --accent: 240 5% 94%;
+    --accent-foreground: 240 6% 12%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 38%;
+    --warning: 32 92% 48%;
+    --border: 240 6% 91%;
+    --input: 240 6% 88%;
+    --ring: 243 75% 59%;
+    --chart-1: 243 75% 59%;
+    --chart-2: 240 5% 70%;
+    --chart-3: 172 55% 40%;
+  }
+  .dark {
+    --background: 240 8% 6%;
+    --foreground: 240 5% 93%;
+    --subtle: 240 7% 8%;
+    --sidebar: 240 8% 7.5%;
+    --card: 240 7% 8.5%;
+    --card-foreground: 240 5% 93%;
+    --popover: 240 7% 10%;
+    --popover-foreground: 240 5% 93%;
+    --primary: 239 84% 70%;
+    --primary-foreground: 240 10% 6%;
+    --secondary: 240 5% 13%;
+    --secondary-foreground: 240 5% 90%;
+    --muted: 240 5% 13%;
+    --muted-foreground: 240 5% 60%;
+    --accent: 240 5% 15%;
+    --accent-foreground: 240 5% 95%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 52% 50%;
+    --warning: 36 90% 58%;
+    --border: 240 5% 15.5%;
+    --input: 240 5% 20%;
+    --ring: 239 84% 70%;
+    --chart-1: 239 84% 70%;
+    --chart-2: 240 5% 38%;
+    --chart-3: 172 50% 50%;
+  }
+
+  * { @apply border-border; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 14px;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+  ::selection { background: hsl(var(--primary) / 0.2); }
+  :focus-visible { outline: none; }
+  .focus-ring { @apply focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-1 focus-visible:ring-offset-background; }
+  h1, h2, h3 { letter-spacing: -0.012em; }
+  input[type="date"]::-webkit-calendar-picker-indicator, input[type="datetime-local"]::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; }
+  .dark input[type="date"]::-webkit-calendar-picker-indicator, .dark input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+}
+
+@layer utilities {
+  .scrollbar-thin { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* Rich text */
+.prose-editor { outline: none; line-height: 1.6; }
+.prose-editor p { margin: 0 0 .6em; }
+.prose-editor h3 { font-weight: 600; font-size: 15px; margin: .8em 0 .4em; }
+.prose-editor ul { list-style: disc; padding-left: 1.25rem; margin: 0 0 .6em; }
+.prose-editor ol { list-style: decimal; padding-left: 1.25rem; margin: 0 0 .6em; }
+.prose-editor a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 2px; }
+.prose-editor:empty::before { content: attr(data-placeholder); color: hsl(var(--muted-foreground)); }
+
+/* Recharts tweaks */
+.recharts-cartesian-grid line { stroke: hsl(var(--border)); }
+.recharts-text { fill: hsl(var(--muted-foreground)); font-size: 12px; }
+.recharts-tooltip-cursor { fill: hsl(var(--muted) / 0.6); }
+
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: white !important; color: black; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  .print-area { box-shadow: none !important; border: none !important; }
+  .dark { color-scheme: light; }
+}
+.print-only { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
