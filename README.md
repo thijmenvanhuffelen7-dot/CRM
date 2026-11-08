@@ -8,17 +8,14 @@ Built with React + TypeScript, Vite, Tailwind CSS, shadcn-style components on Ra
 
 The app runs on Supabase. There is no demo mode and no sample data: a new workspace starts empty.
 
-1. **Database:** the migration in `supabase/migrations/` creates the tables. With the Supabase GitHub integration it runs automatically when this branch is merged into the production branch. You can also paste the file into the SQL editor.
-2. **Environment:** copy `.env.example` to `.env` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Supabase → Project Settings → API). Set the same two variables at your hosting provider.
-3. **Auth:** under Authentication → URL Configuration, set the Site URL to the app's address.
-4. **Run it:**
+- **Database:** the migrations in `supabase/migrations/` run automatically through the Supabase GitHub integration when `main` changes.
+- **Connection:** the app is already set to the production Supabase project (the URL and publishable key in `src/lib/supabase.ts`, both public by design). `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` override them.
+- **Hosting:** Vercel deploys from GitHub; `vercel.json` makes direct links such as `/clients/…` work.
+- **Auth:** in Supabase → Authentication → URL Configuration, the Site URL must be the Vercel address, otherwise confirmation emails link to localhost.
 
-```bash
-npm install
-npm run dev
-```
+To run it locally: `npm install && npm run dev`.
 
-The first person to create an account becomes the admin. Admins add colleagues by email on the Team page; those colleagues then create an account with that email. The roles and what each can do are listed on the Team page.
+The first person to create an account becomes the admin. Admins add colleagues by email on the Team page; those colleagues then create an account with that email.
 
 ## What's inside
 
