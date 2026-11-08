@@ -18,8 +18,7 @@ import { PriorityIcon } from "@/components/shared/badges";
 import { CardGridSkeleton } from "@/components/shared/Skeletons";
 import { useLoading } from "@/hooks/useLoading";
 import { useCan, useCurrentUser } from "@/hooks/usePermission";
-import { uid } from "@/data/seed";
-import { hasSupabase } from "@/lib/supabase";
+import { uid } from "@/lib/id";
 import type { Role, TeamMember } from "@/data/types";
 import { cn, relativeDay } from "@/lib/utils";
 import { priorities } from "@/lib/constants";
@@ -181,13 +180,13 @@ function InviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
   const [f, setF] = useState({ name: "", email: "", role: "copywriter" as Role, title: "", capacity: "40" });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent title="Invite team member" description={hasSupabase ? "Add their email here, then they create an account with it on the sign-in page." : "They'll get an email invite to join the workspace."}>
+      <DialogContent title="Invite team member" description="Add their email here, then they create an account with it on the sign-in page.">
         <form
           className="grid gap-3 sm:grid-cols-2"
           onSubmit={(e) => {
             e.preventDefault();
             upsertMember({ id: uid("u"), name: f.name.trim(), email: f.email.trim().toLowerCase(), role: f.role, title: f.title || roleLabels[f.role], color: String(Math.floor(Math.random() * 360)), capacity: Number(f.capacity) || 40 });
-            toast.success(hasSupabase ? `${f.name.trim()} added` : `Invite sent to ${f.email}`, { description: hasSupabase ? `They can now create an account with ${f.email.trim()}.` : undefined });
+            toast.success(`${f.name.trim()} added`, { description: `They can now create an account with ${f.email.trim()}.` });
             onOpenChange(false);
             setF({ name: "", email: "", role: "copywriter", title: "", capacity: "40" });
           }}
@@ -199,7 +198,7 @@ function InviteDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o:
           <Field label="Job title" className="sm:col-span-2"><Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="e.g. Junior copywriter" /></Field>
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Send invite</Button>
+            <Button type="submit">Add member</Button>
           </DialogFooter>
         </form>
       </DialogContent>

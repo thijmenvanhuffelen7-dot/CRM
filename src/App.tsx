@@ -7,7 +7,7 @@ import { useAuth } from "@/store/auth";
 import { useData } from "@/store/data";
 import { useUI } from "@/store/ui";
 import { PageSkeleton } from "@/components/shared/Skeletons";
-import Login, { AccessProblem } from "@/pages/Login";
+import Login, { AccessProblem, SetupRequired } from "@/pages/Login";
 import { useRemote } from "@/lib/sync";
 import { hasSupabase } from "@/lib/supabase";
 import { setCurrency } from "@/lib/utils";
@@ -26,12 +26,10 @@ function Protected() {
   const userId = useAuth((s) => s.userId);
   const exists = useData((s) => s.team.some((m) => m.id === userId));
   const status = useRemote((s) => s.status);
-  if (hasSupabase) {
-    if (status === "signed_out") return <Login />;
-    if (status === "loading") return <PageSkeleton />;
-    if (status !== "ready") return <AccessProblem />;
-  }
-  if (!userId || !exists) return <Login />;
+  if (!hasSupabase) return <SetupRequired />;
+  if (status === "signed_out") return <Login />;
+  if (status === "loading") return <PageSkeleton />;
+  if (status !== "ready" || !userId || !exists) return <AccessProblem />;
   return <AppShell />;
 }
 

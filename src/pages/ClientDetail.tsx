@@ -58,7 +58,7 @@ import { esps, flowStatusLabel, niches } from "@/lib/constants";
 import { periodAggregate } from "@/lib/metrics";
 import { exportReportPdf } from "@/lib/print";
 import { cn, fileSize, money, num, pct, relativeDay, timeAgo } from "@/lib/utils";
-import { uid } from "@/data/seed";
+import { uid } from "@/lib/id";
 import type { Client, Contact, FileAsset, FlowStatus } from "@/data/types";
 
 const tabs = [

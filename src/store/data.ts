@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
-import { buildSeed, uid, type SeedData } from "@/data/seed";
+import { uid } from "@/lib/id";
 import type {
   Activity,
   AgencyProfile,
@@ -15,13 +14,13 @@ import type {
   PipelineStage,
   Task,
   TeamMember,
+  Workspace,
 } from "@/data/types";
 import { useAuth } from "./auth";
 import { campaignStatusLabel } from "@/lib/constants";
-import { hasSupabase } from "@/lib/supabase";
 
-/** Empty workspace, used when data comes from Supabase instead of the demo seed. */
-export function emptyWorkspace(): SeedData {
+/** Empty workspace; the real content is loaded from Supabase after sign-in. */
+export function emptyWorkspace(): Workspace {
   return {
     team: [],
     packages: [],
@@ -37,13 +36,9 @@ export function emptyWorkspace(): SeedData {
   };
 }
 
-// With Supabase connected the database is the source of truth, so nothing is cached in localStorage.
-const noopStorage: StateStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
-
 type Patch<T> = Partial<T>;
 
-interface DataState extends SeedData {
-  seededAt: string;
+interface DataState extends Workspace {
   // leads
   addLead: (l: Partial<Lead> & Pick<Lead, "company">) => Lead;
   updateLead: (id: string, p: Patch<Lead>) => void;
@@ -79,23 +74,17 @@ interface DataState extends SeedData {
   toggleIntegration: (id: string) => void;
   upsertMember: (m: TeamMember) => void;
   removeMember: (id: string) => void;
-  resetDemo: () => void;
 }
 
-const actor = () => useAuth.getState().userId ?? "u_sophie";
+const actor = () => useAuth.getState().userId ?? "";
 const now = () => new Date().toISOString();
 
-const STORAGE_VERSION = 5;
-
-export const useData = create<DataState>()(
-  persist(
-    (set, get) => {
+export const useData = create<DataState>()((set, get) => {
       const log = (a: Omit<Activity, "id" | "createdAt" | "actorId">) =>
         set((s) => ({ activities: [{ id: uid("a"), createdAt: now(), actorId: actor(), ...a }, ...s.activities].slice(0, 300) }));
 
       return {
-        ...(hasSupabase ? emptyWorkspace() : buildSeed()),
-        seededAt: now(),
+        ...emptyWorkspace(),
 
         // ---------- Leads
         addLead: (l) => {
@@ -333,36 +322,8 @@ export const useData = create<DataState>()(
         upsertMember: (m) =>
           set((s) => ({ team: s.team.some((x) => x.id === m.id) ? s.team.map((x) => (x.id === m.id ? m : x)) : [...s.team, m] })),
         removeMember: (id) => set((s) => ({ team: s.team.filter((m) => m.id !== id) })),
-        resetDemo: () => set({ ...buildSeed(), seededAt: now() }),
       };
-    },
-    {
-      name: "crm-data",
-      storage: createJSONStorage(() => (hasSupabase ? noopStorage : localStorage)),
-      version: STORAGE_VERSION,
-      migrate: () => ({ ...buildSeed(), seededAt: new Date().toISOString() }) as unknown as DataState,
-      onRehydrateStorage: () => (state) => {
-        // Demo data is relative to "today": refresh it if it was seeded on an earlier day
-        // and the user never touched it, so the dashboard never looks stale.
-        if (state && !hasSupabase && new Date(state.seededAt).toDateString() !== new Date().toDateString() && !localStorage.getItem("crm-touched")) {
-          state.resetDemo();
-        }
-      },
-    },
-  ),
-);
-
-// Mark data as user-modified after the first mutation so we stop auto-refreshing the seed.
-let initialised = false;
-useData.subscribe(() => {
-  if (!initialised) return;
-  try {
-    localStorage.setItem("crm-touched", "1");
-  } catch {
-    /* ignore */
-  }
 });
-setTimeout(() => (initialised = true), 0);
 
 // ---------- selectors / helpers
 export const useMember = (id?: string) => useData((s) => s.team.find((m) => m.id === id));

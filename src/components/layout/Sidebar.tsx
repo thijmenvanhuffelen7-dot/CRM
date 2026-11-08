@@ -78,7 +78,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {!collapsed && (
+      {!collapsed && clients.length > 0 && (
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto px-2 scrollbar-thin">
           <p className="px-2 pb-1 text-xs font-medium text-muted-foreground/80">Clients</p>
           {clients.map((c) => (
@@ -98,7 +98,7 @@ export function Sidebar() {
           ))}
         </div>
       )}
-      {collapsed && <div className="flex-1" />}
+      {(collapsed || clients.length === 0) && <div className="flex-1" />}
 
       <div className={cn("flex items-center gap-2 border-t p-2", collapsed && "flex-col")}>
         <div className={cn("flex min-w-0 flex-1 items-center gap-2 px-1", collapsed && "justify-center px-0")}>

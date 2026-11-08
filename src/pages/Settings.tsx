@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Building2, Calendar, GripVertical, Lock, MessageSquare, Monitor, Moon, Package as PackageIcon, Plug, Plus, RotateCcw, ShoppingBag, Sun, Trash2, Workflow, Zap } from "lucide-react";
+import { Building2, Calendar, GripVertical, Lock, MessageSquare, Monitor, Moon, Package as PackageIcon, Plug, Plus, ShoppingBag, Sun, Trash2, Workflow, Zap } from "lucide-react";
 import { useData } from "@/store/data";
 import { useUI } from "@/store/ui";
 import { Page, PageHeader } from "@/components/shared/PageHeader";
@@ -16,11 +16,9 @@ import { Select } from "@/components/ui/select";
 import { InlineNumber, InlineText, PropRow } from "@/components/shared/Inline";
 import { useBoardSensors } from "@/components/shared/Kanban";
 import { useCan } from "@/hooks/usePermission";
-import { uid } from "@/data/seed";
+import { uid } from "@/lib/id";
 import type { Integration, PipelineStage, StageKind } from "@/data/types";
 import { cn, money, setCurrency } from "@/lib/utils";
-import { hasSupabase } from "@/lib/supabase";
-import { loadDemoData } from "@/lib/sync";
 
 const sections = [
   { id: "agency", label: "Agency profile", icon: Building2 },
@@ -28,7 +26,6 @@ const sections = [
   { id: "pipeline", label: "Pipeline stages", icon: Workflow },
   { id: "integrations", label: "Integrations", icon: Plug },
   { id: "appearance", label: "Appearance", icon: Monitor },
-  { id: "data", label: "Workspace data", icon: RotateCcw },
 ];
 
 export default function Settings() {
@@ -66,7 +63,6 @@ export default function Settings() {
           {section === "pipeline" && <PipelineSection disabled={!canManage} />}
           {section === "integrations" && <IntegrationsSection disabled={!canManage} />}
           {section === "appearance" && <AppearanceSection />}
-          {section === "data" && <DataSection disabled={!canManage} />}
         </div>
       </div>
     </Page>
@@ -259,7 +255,7 @@ function IntegrationsSection({ disabled }: { disabled: boolean }) {
                 aria-label={`Connect ${m.name}`}
                 onCheckedChange={() => {
                   toggleIntegration(i.id);
-                  toast(i.connected ? `${m.name} disconnected` : `${m.name} connected`, { description: i.connected ? undefined : "Demo mode — no data is synced yet." });
+                  toast(i.connected ? `${m.name} disconnected` : `${m.name} connected`, { description: i.connected ? undefined : "Sync for this integration isn't built yet." });
                 }}
               />
             </Card>
@@ -305,58 +301,6 @@ function AppearanceSection() {
           </span>
           <Switch checked={sidebarCollapsed} onCheckedChange={toggleSidebar} />
         </label>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DataSection({ disabled }: { disabled: boolean }) {
-  const resetDemo = useData((s) => s.resetDemo);
-  const counts = { clients: useData((s) => s.clients.length), leads: useData((s) => s.leads.length), campaigns: useData((s) => s.campaigns.length) };
-  return (
-    <Card>
-      <CardHeader><CardTitle>Workspace data</CardTitle></CardHeader>
-      <CardContent className="space-y-4 text-sm">
-        {hasSupabase ? (
-          <>
-            <p className="text-muted-foreground">
-              Connected to Supabase. Changes are saved to the database and show up live for everyone on the team. The workspace has {counts.clients} clients, {counts.leads} leads and {counts.campaigns} campaigns.
-            </p>
-            <Button
-              variant="secondary"
-              disabled={disabled}
-              onClick={() => {
-                if (!window.confirm("Replace all clients, leads, campaigns, tasks and reports in the database with demo data? This can't be undone.")) return;
-                loadDemoData();
-                toast.success("Demo data loaded", { description: "Saved to Supabase." });
-              }}
-            >
-              <RotateCcw /> Load demo data
-            </Button>
-          </>
-        ) : (
-          <>
-            <p className="text-muted-foreground">
-              Running in demo mode: data is stored in this browser only. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to connect Supabase (migrations in supabase/migrations).
-            </p>
-            <Button
-              variant="secondary"
-              disabled={disabled}
-              onClick={() => {
-                if (!window.confirm("Reset all clients, leads, campaigns and tasks to the demo data?")) return;
-                resetDemo();
-                try {
-                  localStorage.removeItem("crm-touched");
-                } catch {
-                  /* ignore */
-                }
-                toast.success("Demo data restored");
-              }}
-            >
-              <RotateCcw /> Reset demo data
-            </Button>
-          </>
-        )}
       </CardContent>
     </Card>
   );

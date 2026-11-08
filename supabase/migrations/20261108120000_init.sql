@@ -88,7 +88,7 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- Default workspace settings so a fresh project works before demo data is loaded.
+-- Default workspace settings (packages, pipeline stages, integrations) for a fresh project.
 insert into public.settings (id, data) values
   ('agency', '{"name":"My Agency","website":"","email":"","currency":"EUR","address":""}'),
   ('packages', '[{"id":"p_starter","name":"Starter","price":1500,"campaignsPerMonth":4,"description":"Core flows and a weekly newsletter.","features":["4 campaigns / month","3 core flows","Monthly report"]},{"id":"p_growth","name":"Growth","price":2800,"campaignsPerMonth":8,"description":"Twice-weekly campaigns and full flow build-out.","features":["8 campaigns / month","All 5 core flows","A/B testing"]},{"id":"p_premium","name":"Premium","price":4500,"campaignsPerMonth":12,"description":"Full-service retention with SMS and segmentation.","features":["12 campaigns / month","Advanced segmentation","SMS"]}]'),

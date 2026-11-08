@@ -9,7 +9,7 @@ import type { RealtimeChannel, Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { useData } from "@/store/data";
 import { useAuth } from "@/store/auth";
-import { buildSeed, type SeedData } from "@/data/seed";
+import type { Workspace } from "@/data/types";
 
 type Status = "signed_out" | "loading" | "ready" | "no_access" | "error";
 
@@ -93,7 +93,7 @@ async function flush() {
 const chunk = <T,>(arr: T[], n: number) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
 
 /** Compare two store snapshots and queue the differences. */
-function diff(prev: SeedData, next: SeedData) {
+function diff(prev: Workspace, next: Workspace) {
   (Object.keys(collections) as CollectionKey[]).forEach((key) => {
     const a = prev[key] as unknown as Doc[];
     const b = next[key] as unknown as Doc[];
@@ -139,7 +139,7 @@ async function load(session: Session, silent = false) {
   if (!silent) useRemote.setState({ status: "loading", email, error: null });
   try {
     const [settings, ...cols] = await Promise.all([fetchAll("settings"), ...Object.values(collections).map(fetchAll)]);
-    const patch: Partial<SeedData> = {};
+    const patch: Partial<Workspace> = {};
     (Object.keys(collections) as CollectionKey[]).forEach((key, i) => {
       (patch as Doc)[key] = cols[i].map((r) => r.data);
     });
@@ -183,7 +183,7 @@ function subscribe() {
       if (payload.eventType !== "DELETE" && written.get(ref) === stable(row.data)) return; // echo of our own write
       applyRemote(() => {
         if (table === "settings") {
-          if (payload.eventType !== "DELETE" && (settingKeys as readonly string[]).includes(row.id!)) useData.setState({ [row.id as SettingKey]: row.data } as Partial<SeedData>);
+          if (payload.eventType !== "DELETE" && (settingKeys as readonly string[]).includes(row.id!)) useData.setState({ [row.id as SettingKey]: row.data } as Partial<Workspace>);
           return;
         }
         const key = keyByTable[table];
@@ -191,10 +191,10 @@ function subscribe() {
         useData.setState((s) => {
           const list = s[key] as unknown as Doc[];
           const rest = list.filter((x) => idOf(key, x) !== row.id);
-          if (payload.eventType === "DELETE") return { [key]: rest } as Partial<SeedData>;
+          if (payload.eventType === "DELETE") return { [key]: rest } as Partial<Workspace>;
           const exists = rest.length !== list.length;
           const next = exists ? list.map((x) => (idOf(key, x) === row.id ? row.data! : x)) : key === "activities" ? [row.data!, ...list] : [...list, row.data!];
-          return { [key]: next } as Partial<SeedData>;
+          return { [key]: next } as Partial<Workspace>;
         });
       });
       if (table === "team_members") {
@@ -248,28 +248,4 @@ export async function retrySync() {
     loadedFor = session.user.id;
     await load(session);
   }
-}
-
-/**
- * Replace the workspace content with the demo data set. The signed-in admin takes the place
- * of the demo admin; the demo copywriter and designer are added as placeholder members.
- */
-export function loadDemoData() {
-  const state = useData.getState();
-  const me = state.team.find((m) => m.id === useAuth.getState().userId);
-  if (!me) return;
-  const seed = JSON.parse(JSON.stringify(buildSeed()).split('"u_sophie"').join(JSON.stringify(me.id))) as SeedData;
-  useData.setState({
-    team: [me, ...seed.team.filter((m) => m.id !== me.id)],
-    clients: seed.clients,
-    leads: seed.leads,
-    campaigns: seed.campaigns,
-    tasks: seed.tasks,
-    metrics: seed.metrics,
-    activities: seed.activities,
-    packages: seed.packages,
-    stages: seed.stages,
-    integrations: seed.integrations,
-    agency: state.agency.name && state.agency.name !== "My Agency" ? state.agency : seed.agency,
-  });
 }

@@ -95,9 +95,9 @@ function DashboardContent() {
           <Sparkles className="size-5 shrink-0 text-primary" />
           <div className="min-w-[200px] flex-1">
             <p className="text-sm font-medium">Your workspace is empty</p>
-            <p className="text-sm text-muted-foreground">Add your first client or lead, or load the demo data set from Settings to explore.</p>
+            <p className="text-sm text-muted-foreground">Add your first client or lead to get started. Invite your team on the Team page.</p>
           </div>
-          <Button variant="secondary" size="sm" onClick={() => navigate("/settings?section=data")}>Load demo data</Button>
+          <Button variant="secondary" size="sm" onClick={() => navigate("/team")}>Invite team</Button>
           <Button size="sm" onClick={() => setNewClientOpen(true)}><Plus /> Add client</Button>
         </Card>
       )}

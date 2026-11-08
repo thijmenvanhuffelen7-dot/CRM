@@ -212,3 +212,18 @@ export interface Integration {
   id: "klaviyo" | "shopify" | "slack" | "gcal";
   connected: boolean;
 }
+
+/** Everything in a workspace, as held in the client store and synced to Supabase. */
+export interface Workspace {
+  team: TeamMember[];
+  packages: Package[];
+  stages: PipelineStage[];
+  clients: Client[];
+  leads: Lead[];
+  campaigns: Campaign[];
+  tasks: Task[];
+  metrics: MonthlyMetric[];
+  activities: Activity[];
+  agency: AgencyProfile;
+  integrations: Integration[];
+}
