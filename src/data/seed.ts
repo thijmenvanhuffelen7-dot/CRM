@@ -274,6 +274,40 @@ export function buildSeed(now = new Date()) {
   }
   void statusesFuture;
 
+  // Sent history from the previous two months, so reports have campaign-level data.
+  const historyNames = ["Weekly newsletter", "Best sellers recap", "Customer favourites", "New arrivals", "Last chance", "Founder's note"];
+  for (let i = 0; i < 14; i++) {
+    const client = clients[(i * 3) % clients.length];
+    const offset = -12 - i * 4 - int(0, 2);
+    const recipients = Math.round(client.listSize * between(0.45, 0.9));
+    const conversionRate = +between(0.08, 0.45).toFixed(2);
+    campaigns.push({
+      id: `cp_h${i + 1}`,
+      clientId: client.id,
+      name: historyNames[i % historyNames.length],
+      subject: `${historyNames[i % historyNames.length]} from ${client.name}`,
+      previewText: "Hand-picked for you, this week only.",
+      sendAt: at(offset, pick([9, 10, 19]), 0),
+      segment: pick(segments),
+      assigneeId: pick(["u_sophie", "u_daan", "u_mila"]),
+      status: "sent",
+      copy: "<p>Archived campaign.</p>",
+      designUrl: "https://www.figma.com/file/demo",
+      checklist: { links: true, mobile: true, utm: true, spam: true },
+      approval: "approved",
+      comments: [],
+      metrics: {
+        recipients,
+        openRate: +between(34, 58).toFixed(1),
+        clickRate: +between(1.1, 4.6).toFixed(2),
+        conversionRate,
+        revenue: Math.round(recipients * (conversionRate / 100) * between(55, 95)),
+        unsubRate: +between(0.08, 0.32).toFixed(2),
+      },
+      createdAt: at(offset - 10),
+    });
+  }
+
   // ---- Tasks (25)
   const taskDefs: [string, number | null, Priority, string, number?, number?][] = [
     ["Finalise Black Friday calendar for Kicks Collective", 0, "urgent", "u_sophie", 2],

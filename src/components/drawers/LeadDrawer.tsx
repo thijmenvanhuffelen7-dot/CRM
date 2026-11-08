@@ -32,7 +32,8 @@ import { InlineDate, InlineNumber, InlineSelect, InlineText, PropRow } from "@/c
 import { MemberAvatar } from "@/components/shared/Avatar";
 import { toOptions, useMemberOptions } from "@/components/shared/options";
 import { esps, niches, platforms } from "@/lib/constants";
-import { cn, money, relativeDay, timeAgo } from "@/lib/utils";
+import { cn, dueLabel, money, timeAgo } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
 import { useCan } from "@/hooks/usePermission";
 import { modKey } from "@/lib/utils";
 
@@ -130,16 +131,15 @@ function LeadDetail({ id }: { id: string }) {
 
       <div className="flex flex-wrap items-center gap-2 px-5 pb-4">
         <div className="w-44">
-          <InlineSelect
+          <Select
             ariaLabel="Stage"
             value={lead.stageId}
-            onSave={(v) => {
+            onValueChange={(v) => {
               moveLead(id, v);
               const st = stages.find((s) => s.id === v);
               if (st?.kind === "won") toast.success(`${lead.company} marked as won 🎉`);
             }}
             options={stages.map((s) => ({ value: s.id, label: s.name }))}
-            className="border"
           />
         </div>
         <span className="text-xs text-muted-foreground">
@@ -180,7 +180,7 @@ function LeadDetail({ id }: { id: string }) {
               value={lead.nextFollowUp}
               onSave={(v) => u({ nextFollowUp: v })}
               ariaLabel="Next follow-up"
-              display={(v) => <span className={cn(followOverdue && "font-medium text-danger")}>{relativeDay(v)} · {format(new Date(v), "d MMM")}</span>}
+              display={(v) => <span className={cn(followOverdue && "font-medium text-danger")}>{dueLabel(v)}</span>}
             />
           </PropRow>
           <PropRow label="Source" icon={<Tag />}>

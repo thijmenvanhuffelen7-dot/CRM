@@ -110,3 +110,9 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+@media print {
+  body:has(#print-root) #main > div > *:not(:has(#print-root)):not(#print-root) { display: none !important; }
+  body:has(#print-root) [role="tablist"] { display: none !important; }
+  .recharts-wrapper, .print-area { break-inside: avoid; }
+}

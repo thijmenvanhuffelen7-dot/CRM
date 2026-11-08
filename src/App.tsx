@@ -8,6 +8,7 @@ import { useData } from "@/store/data";
 import { useUI } from "@/store/ui";
 import { PageSkeleton } from "@/components/shared/Skeletons";
 import Login from "@/pages/Login";
+import { setCurrency } from "@/lib/utils";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Leads = lazy(() => import("@/pages/Leads"));
@@ -28,9 +29,11 @@ function Protected() {
 
 export default function App() {
   const theme = useUI((s) => s.theme);
+  const currency = useData((s) => s.agency.currency);
+  setCurrency(currency);
   return (
     <TooltipProvider delayDuration={350} skipDelayDuration={150}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Suspense fallback={<PageSkeleton />}>
           <Routes>
             <Route element={<Protected />}>

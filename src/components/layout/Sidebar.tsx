@@ -26,7 +26,7 @@ export function Sidebar() {
     <aside
       aria-label="Main navigation"
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r bg-sidebar transition-[width] duration-200 ease-out md:flex",
+        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r bg-sidebar print:!hidden transition-[width] duration-200 ease-out md:flex",
         collapsed ? "w-[56px]" : "w-[232px]",
       )}
     >

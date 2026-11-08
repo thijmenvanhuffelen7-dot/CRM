@@ -41,7 +41,7 @@ export function Topbar() {
   const canClients = useCan("clients.manage");
 
   return (
-    <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur-md md:px-6">
+    <header className="no-print sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur-md md:px-6">
       <div className="min-w-0 flex-1">
         <Crumbs />
       </div>

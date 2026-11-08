@@ -14,7 +14,7 @@ export function MobileNav() {
   const moreActive = rest.some((r) => pathname.startsWith(r.to));
   return (
     <>
-      <nav aria-label="Main navigation" className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 backdrop-blur-md pb-safe md:hidden">
+      <nav aria-label="Main navigation" className="no-print fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 backdrop-blur-md pb-safe md:hidden">
         <div className="grid grid-cols-5">
           {primary.map((item) => (
             <NavLink

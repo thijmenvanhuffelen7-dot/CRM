@@ -10,11 +10,12 @@ let currency = "EUR";
 export const setCurrency = (c: string) => (currency = c);
 
 export function money(n: number, opts: { compact?: boolean } = {}) {
+  const compact = opts.compact && Math.abs(n) >= 10000;
   return new Intl.NumberFormat("en-IE", {
     style: "currency",
     currency,
-    maximumFractionDigits: opts.compact && Math.abs(n) >= 1000 ? 1 : 0,
-    notation: opts.compact && Math.abs(n) >= 10000 ? "compact" : "standard",
+    maximumFractionDigits: compact ? 1 : 0,
+    notation: compact ? "compact" : "standard",
   }).format(n);
 }
 
@@ -33,6 +34,12 @@ export function relativeDay(iso: string | null | undefined) {
   const diff = differenceInCalendarDays(d, new Date());
   if (diff > 0 && diff < 7) return format(d, "EEEE");
   return format(d, diff > 300 || diff < -300 ? "d MMM yyyy" : "d MMM");
+}
+
+/** Relative day with the calendar date appended when the label is a word ("Friday · 13 Nov"). */
+export function dueLabel(iso: string) {
+  const r = relativeDay(iso);
+  return /\d/.test(r) ? r : `${r} · ${format(new Date(iso), "d MMM")}`;
 }
 
 export function timeAgo(iso: string) {
